@@ -1,5 +1,6 @@
 {
   "name": "FeedSpace API Documentation",
+  "theme": "mint",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
