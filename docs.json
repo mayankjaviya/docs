@@ -21,12 +21,6 @@
     "name": "Visit FeedSpace", 
     "url": "https://app.feedspace.io"
   },
-  "tabs": [
-    {
-      "name": "API Reference",
-      "url": "api-reference"
-    }
-  ],
   "anchors": [
     {
       "name": "Documentation",
@@ -41,6 +35,12 @@
         "index",
         "quickstart", 
         "development"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        "api-reference/introduction"
       ]
     }
   ],
