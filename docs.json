@@ -39,23 +39,21 @@
       "group": "Get Started",
       "pages": [
         "index",
-        "quickstart",
+        "quickstart", 
         "development"
-      ]
-    },
-    {
-      "group": "API Reference", 
-      "pages": [
-        {
-          "group": "Endpoints",
-          "openapi": {
-            "source": "openapi.yml",
-            "directory": "api-reference"
-          }
-        }
       ]
     }
   ],
+  "api": {
+    "baseUrl": "https://api.feedspace.io",
+    "auth": {
+      "method": "bearer"
+    },
+    "playground": {
+      "mode": "show"
+    }
+  },
+  "openapi": "openapi.yml",
   "footerSocials": {
     "website": "https://feedspace.io"
   }
