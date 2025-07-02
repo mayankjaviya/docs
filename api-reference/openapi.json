@@ -858,7 +858,7 @@
             "name": "fs-workspace-id",
             "in": "header",
             "description": "Workspace ID",
-            "required": false,
+            "required": true,
             "schema": { "type": "string" }
           }
         ],
@@ -1047,7 +1047,7 @@
             "name": "fs-workspace-id",
             "in": "header",
             "description": "Workspace ID",
-            "required": false,
+            "required": true,
             "schema": { "type": "string" }
           }
         ],
@@ -1150,6 +1150,13 @@
             "name": "video_feed_id",
             "in": "path",
             "description": "ID of the video feed",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
             "required": true,
             "schema": { "type": "string" }
           }
@@ -1906,6 +1913,15 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
         "responses": {
           "200": {
             "description": "A list of review forms.",
@@ -1987,6 +2003,15 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2057,6 +2082,13 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -2223,6 +2255,13 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
           }
         ],
         "requestBody": {
