@@ -1,60 +1,106 @@
 {
-  "name": "FeedSpace API Documentation",
+  "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "logo": {
-    "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
+  "name": "Feedspace API Documentation",
+  "colors": {
+    "primary": "#111827",
+    "light": "#f3f4f6",
+    "dark": "#f3f4f6"
   },
   "favicon": "/favicon.svg",
-  "colors": {
-    "primary": "#0D9373",
-    "light": "#07C983", 
-    "dark": "#0D9373"
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "API Documentation",
+            "pages": [
+              "api-reference/authentication"
+            ]
+          },
+          {
+            "group": "Auth",
+            "pages": [
+              "api-reference/Auth/login",
+              "api-reference/Auth/refresh-token",
+              "api-reference/Auth/user-details"
+            ]
+          },
+          {
+            "group": "Workspaces/Projects",
+            "pages": [
+              "api-reference/Workspace/create-workspace",
+              "api-reference/Workspace/update-workspace",
+              "api-reference/Workspace/workspace-list"
+            ]
+          },
+          {
+            "group": "Audio Reviews",
+            "pages": [
+              "api-reference/AudioReviews/add-to-favourite",
+              "api-reference/AudioReviews/all-audio-reviews",
+              "api-reference/AudioReviews/remove-favourite",
+              "api-reference/AudioReviews/single-audio-review",
+              "api-reference/AudioReviews/soft-delete"
+            ]
+          },
+          {
+            "group": "Video Reviews",
+            "pages": [
+              "api-reference/VideoReviews/add-to-favourite",
+              "api-reference/VideoReviews/all-video-reviews",
+              "api-reference/VideoReviews/remove-favourite",
+              "api-reference/VideoReviews/soft-delete"
+            ]
+          },
+          {
+            "group": "Text Reviews",
+            "pages": [
+              "api-reference/TextReviews/add-to-favourite",
+              "api-reference/TextReviews/all-text-reviews",
+              "api-reference/TextReviews/remove-favourite",
+              "api-reference/TextReviews/soft-delete"
+            ]
+          },
+          {
+            "group": "Wall of Love (Page)",
+            "pages": [
+              "api-reference/WallOfLove(Page)/all-pages",
+              "api-reference/WallOfLove(Page)/create-page",
+              "api-reference/WallOfLove(Page)/get-reviews",
+              "api-reference/WallOfLove(Page)/update-page"
+            ]
+          },
+          {
+            "group": "Review Forms",
+            "pages": [
+              "api-reference/ReviewForms/create-form",
+              "api-reference/ReviewForms/update-form",
+              "api-reference/ReviewForms/get-form",
+              "api-reference/ReviewForms/get-all-forms"
+            ]
+          },
+          {
+            "group": "Import Reviews",
+            "pages": [
+              "api-reference/ImportReviews/SelfImport/import-text-review",
+              "api-reference/ImportReviews/SelfImport/import-video-review"
+            ]
+          }
+        ]
+      }
+    ]
   },
-  "topbarLinks": [
-    {
-      "name": "Support",
-      "url": "mailto:support@feedspace.io"
-    }
-  ],
-  "topbarCtaButton": {
-    "name": "Visit FeedSpace", 
-    "url": "https://app.feedspace.io"
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
   },
-  "anchors": [
-    {
-      "name": "Documentation",
-      "icon": "book-open",
-      "url": "https://docs.feedspace.io"
+  "navbar": {
+    "primary": {
+      "type": "button",
+      "label": "Go to App",
+      "href": "https://app.feedspace.io/"
     }
-  ],
-  "navigation": [
-    {
-      "group": "Get Started",
-      "pages": [
-        "index",
-        "quickstart", 
-        "development"
-      ]
-    },
-    {
-      "group": "API Reference",
-      "pages": [
-        "api-reference/introduction"
-      ]
-    }
-  ],
-  "api": {
-    "baseUrl": "https://api.feedspace.io",
-    "auth": {
-      "method": "bearer"
-    },
-    "playground": {
-      "mode": "show"
-    }
-  },
-  "openapi": "openapi.yml",
-  "footerSocials": {
-    "website": "https://feedspace.io"
   }
 }

@@ -1,0 +1,12 @@
+#topbar-cta-button a span{
+    background-color: black !important;
+}
+
+footer{
+    display: none !important;
+}
+
+.bg-primary-dark{
+    background-color: white !important;
+    color: black !important;
+}

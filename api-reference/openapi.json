@@ -10,63 +10,28 @@
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
+      "url": "https://api.feedspace.io/v3"
     }
   ],
   "paths": {
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
+    "/oauth/token": {
       "post": {
-        "description": "Creates a new plant in the store",
+        "description": "The primary purpose of this request is to obtain an access token that grants authorization for subsequent API requests. By exchanging valid credentials, such as a username and password, clients can obtain an access token that serves as a bearer token for validating future requests.\n\nResponse:\nUpon successful authentication, the endpoint responds with an access token and a refresh token. The access token, when included in the Authorization header of subsequent requests, validates the client's authorization. The refresh token allows clients to generate new access tokens without needing to re-enter credentials, enhancing user experience and security.",
         "requestBody": {
-          "description": "Plant to add to the store",
+          "description": "Login or refresh parameters.",
           "content": {
-            "application/json": {
+            "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string", "description": "Required, your feedspace.io account's email" },
+                  "password": { "type": "string", "description": "Required, feedspace.io account's password" },
+                  "grant_type": { "type": "string", "description": "Required, either 'password' or 'refresh_token'" },
+                  "client_id": { "type": "string", "description": "Required, will be provided by feedspace team." },
+                  "client_secret": { "type": "string", "description": "Required, will be provided by feedspace team." },
+                  "refresh_token": { "type": "string", "description": "Required if grant_type is 'refresh_token'" }
+                },
+                "required": ["grant_type", "client_id", "client_secret"]
               }
             }
           },
@@ -74,21 +39,27 @@
         },
         "responses": {
           "200": {
-            "description": "plant response",
+            "description": "Successful authentication response.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "token_type": { "type": "string" },
+                    "expires_in": { "type": "integer" },
+                    "access_token": { "type": "string" },
+                    "refresh_token": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "token_type": "Bearer",
+                      "expires_in": 31536000,
+                      "access_token": "<access_token>",
+                      "refresh_token": "<refresh_token>"
+                    }
+                  }
                 }
               }
             }
@@ -96,57 +67,2458 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
+    "/oauth/users": {
+      "get": {
+        "description": "The primary purpose of this request is to fetch detailed information about the user who is currently logged in and authenticated via OAuth. By accessing this endpoint, clients can retrieve user-specific data, including profile information, preferences, and other relevant details necessary for delivering personalized services.\n\nResponse:\nUpon successful authentication and authorization, the endpoint responds with a JSON object containing various attributes and details associated with the logged-in user. This may include but is not limited to user ID, username, email address, profile picture URL, and any additional custom attributes.",
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
+          "200": {
+            "description": "User details fetched successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "unique_user_id": { "type": "string" },
+                        "name": { "type": "string" },
+                        "email": { "type": "string" },
+                        "user_meta": {
+                          "type": "object",
+                          "properties": {
+                            "user_type": { "type": "string" },
+                            "allowed_workspace": { "type": "string" },
+                            "video_time_limit": { "type": "string" },
+                            "allowed_video_playback": { "type": "string" },
+                            "text_feed_notification": { "type": "string" },
+                            "video_feed_notification": { "type": "string" },
+                            "video_feed_submission_notification": { "type": "string" },
+                            "summary_email_notification": { "type": "string" },
+                            "allowed_wall_of_love_promotion": { "type": "string" },
+                            "allowed_ff_per_workspace": { "type": "string" },
+                            "allowed_vff_per_workspace": { "type": "string" },
+                            "allowed_tff_per_workspace": { "type": "string" },
+                            "save_profile_account_attempts": { "type": "string" },
+                            "logout_of_all_sessions_attempts": { "type": "string" },
+                            "save_notifications_attempts": { "type": "string" },
+                            "allowed_aff_per_workspace": { "type": "string" },
+                            "audio_feed_notification": { "type": "string" },
+                            "audio_feed_submission_notification": { "type": "string" },
+                            "allowed_audio_playback": { "type": "string" },
+                            "storage_used": { "type": "string" },
+                            "hide_fs_branding": { "type": "string" },
+                            "use_feedspace_redirect_page": { "type": "string" },
+                            "import_social_feeds": { "type": "string" },
+                            "import_video_inside_app": { "type": "string" },
+                            "delete_allowed": { "type": "string" },
+                            "wol_feeds_selection_limit": { "type": "string" },
+                            "upload_video_outside_app": { "type": "string" },
+                            "upload_audio_outside_app": { "type": "string" },
+                            "import_csv_text_feeds": { "type": "string" },
+                            "allow_custom_domain": { "type": "string" },
+                            "allow_free_trial": { "type": "string" },
+                            "multiple_languages_allowed": { "type": "string" },
+                            "import_contacts": { "type": "string" },
+                            "allowed_storage": { "type": "string" },
+                            "allow_tff_rating_type_option": { "type": "string" },
+                            "allow_upload_file_option_video": { "type": "string" },
+                            "allow_upload_file_option_audio": { "type": "string" },
+                            "allow_api_access_token": { "type": "string" },
+                            "allow_webhook_setup": { "type": "string" },
+                            "allow_link_in_feed_form": { "type": "string" },
+                            "allow_trial_days": { "type": "string" },
+                            "is_app_register": { "type": "string" },
+                            "profile_pic_url": { "type": ["string", "null"] }
+                          }
+                        },
+                        "workspaces": { "type": "integer" }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "id": 7243,
+                        "unique_user_id": "zhBU6t",
+                        "name": "User",
+                        "email": "developer@feedspace.io",
+                        "user_meta": {
+                          "user_type": "0",
+                          "allowed_workspace": "1",
+                          "video_time_limit": "180",
+                          "allowed_video_playback": "4",
+                          "text_feed_notification": "1",
+                          "video_feed_notification": "1",
+                          "video_feed_submission_notification": "1",
+                          "summary_email_notification": "1",
+                          "allowed_wall_of_love_promotion": "1",
+                          "allowed_ff_per_workspace": "2",
+                          "allowed_vff_per_workspace": "2",
+                          "allowed_tff_per_workspace": "10",
+                          "save_profile_account_attempts": "0",
+                          "logout_of_all_sessions_attempts": "0",
+                          "save_notifications_attempts": "0",
+                          "allowed_aff_per_workspace": "2",
+                          "audio_feed_notification": "1",
+                          "audio_feed_submission_notification": "1",
+                          "allowed_audio_playback": "4",
+                          "storage_used": "0",
+                          "hide_fs_branding": "0",
+                          "use_feedspace_redirect_page": "0",
+                          "import_social_feeds": "1",
+                          "import_video_inside_app": "1",
+                          "delete_allowed": "1",
+                          "wol_feeds_selection_limit": "5",
+                          "upload_video_outside_app": "1",
+                          "upload_audio_outside_app": "1",
+                          "import_csv_text_feeds": "1",
+                          "allow_custom_domain": "0",
+                          "allow_free_trial": "1",
+                          "multiple_languages_allowed": "0",
+                          "import_contacts": "0",
+                          "allowed_storage": "1000000000",
+                          "allow_tff_rating_type_option": "1",
+                          "allow_upload_file_option_video": "1",
+                          "allow_upload_file_option_audio": "1",
+                          "allow_api_access_token": "1",
+                          "allow_webhook_setup": "1",
+                          "allow_link_in_feed_form": "0",
+                          "allow_trial_days": "7",
+                          "is_app_register": "1",
+                          "profile_pic_url": null
+                        },
+                        "workspaces": 1
+                      }
+                    }
+                  }
                 }
               }
             }
           }
         }
       }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
+    },
+    "/workspaces": {
+      "get": {
+        "description": "The primary purpose of this request is to provide users with a paginated list of their workspaces, allowing them to navigate through their projects efficiently. By accessing this endpoint, users can retrieve essential information about each project, such as its name, description, and other relevant details.\n\nResponse:\nThe response contains list of all available workspaces along with associated forms as well. features[] represent text feed forms, audio_features[] represents audio feed forms, video_features[] represents video feed forms.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "required": false,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workspaces list fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": { "type": "integer" },
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "integer" },
+                              "unique_workspace_id": { "type": "string" },
+                              "name": { "type": "string" },
+                              "domain": { "type": ["string", "null"] },
+                              "website_url": { "type": ["string", "null"] },
+                              "logo": { "type": ["string", "null"] },
+                              "description": { "type": ["string", "null"] },
+                              "logo_url": { "type": ["string", "null"] }
+                            }
+                          }
+                        },
+                        "first_page_url": { "type": "string" },
+                        "from": { "type": "integer" },
+                        "next_page_url": { "type": ["string", "null"] },
+                        "path": { "type": "string" },
+                        "per_page": { "type": "integer" },
+                        "prev_page_url": { "type": ["string", "null"] },
+                        "to": { "type": "integer" }
+                      }
+                    },
+                    "show_updated_banner": { "type": "boolean" },
+                    "updated_banner_video": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "current_page": 1,
+                        "data": [
+                          {
+                            "id": 5020,
+                            "unique_workspace_id": "workspace_XFNj94dgkDhc6lc5rsjF66nr",
+                            "name": "My First Workspace",
+                            "domain": null,
+                            "website_url": null,
+                            "logo": null,
+                            "description": null,
+                            "logo_url": null
+                          }
+                        ],
+                        "first_page_url": "https://api.feedspace.io/v3/workspaces?page=1",
+                        "from": 1,
+                        "next_page_url": null,
+                        "path": "https://api.feedspace.io/v3/workspaces",
+                        "per_page": 1000,
+                        "prev_page_url": null,
+                        "to": 1
+                      },
+                      "show_updated_banner": false,
+                      "updated_banner_video": "https://feedspace-test.s3.ap-south-1.amazonaws.com/uploads/F43kUl/video-feed/feed_MJcmzA81710841191347.mp4"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ]
+      },
       "post": {
-        "description": "Information about a new plant added to the store",
+        "description": "The primary purpose of this request is to enable users to create new workspaces tailored to their specific needs and objectives. By submitting the necessary parameters, such as the project name, description, and any other relevant details, users can initiate projects seamlessly.",
         "requestBody": {
-          "description": "Plant added to the store",
+          "description": "Workspace creation parameters (form-data)",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "logo": { "type": "string", "format": "binary", "description": "Image file, max 15MB" },
+                  "name": { "type": "string", "description": "Required" },
+                  "description": { "type": "string", "description": "Optional, max 160 characters" },
+                  "website_url": { "type": "string", "description": "Optional, URL" }
+                },
+                "required": ["name"]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Workspace created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "unique_workspace_id": { "type": "string" },
+                        "name": { "type": "string" },
+                        "domain": { "type": ["string", "null"] },
+                        "website_url": { "type": "string" },
+                        "logo": { "type": ["string", "null"] },
+                        "logo_url": { "type": ["string", "null"] },
+                        "description": { "type": "string" }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "message": "Workspace Created Successfully",
+                      "data": {
+                        "id": 5022,
+                        "unique_workspace_id": "workspace_ZuYEOLliSpLzzH76bk5x7PPY",
+                        "name": "G Workspace",
+                        "domain": null,
+                        "website_url": "",
+                        "logo": null,
+                        "logo_url": null,
+                        "description": ""
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ]
+      }
+    },
+    "/workspaces/{workspace_id}": {
+      "post": {
+        "description": "The primary purpose of this request is to provide users with the capability to update existing workspaces according to their needs. By specifying the workspace ID and providing updated values for relevant attributes, users can effectively modify the properties of the workspace.",
+        "requestBody": {
+          "description": "Workspace update parameters (form-data, with _method=PUT)",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "_method": { "type": "string", "description": "Must be PUT" },
+                  "name": { "type": "string", "description": "Required" },
+                  "description": { "type": "string", "description": "Optional" },
+                  "website_url": { "type": "string", "description": "Optional" }
+                },
+                "required": ["_method", "name"]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Workspace updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "message": "Workspace Updated Successfully"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ]
+      }
+    },
+    "/feeds?filter[feed-types][]=audio": {
+      "get": {
+        "description": "Get paginated list of all Audio Feeds received.",
+        "parameters": [
+          {
+            "name": "filter[feed-types][]",
+            "in": "query",
+            "description": "Feed type filter (audio)",
+            "required": true,
+            "schema": { "type": "string", "enum": ["audio"] }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audio reviews list fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": { "type": "integer" },
+                        "data": {
+                          "type": "array",
+                          "items": { "type": "object" }
+                        },
+                        "first_page_url": { "type": "string" },
+                        "from": { "type": "integer" },
+                        "next_page_url": { "type": ["string", "null"] },
+                        "path": { "type": "string" },
+                        "per_page": { "type": "integer" },
+                        "prev_page_url": { "type": ["string", "null"] },
+                        "to": { "type": "integer" }
+                      }
+                    },
+                    "show_updated_banner": { "type": "boolean" },
+                    "updated_banner_video": { "type": "string" },
+                    "show_workspaces_merge_banner": { "type": "boolean" },
+                    "unique_form_id": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "current_page": 1,
+                        "data": [
+                          {
+                            "feed_type": "audio_feed",
+                            "id": 544,
+                            "unique_feedback_id": "qrTTi2",
+                            "comment": null,
+                            "favourite": 0,
+                            "is_locked": 0,
+                            "is_video_converted": null,
+                            "is_audio_converted": 1,
+                            "customer_designation": null,
+                            "created_at": "2025-04-07T08:50:44.000000Z",
+                            "feed_fields": {
+                              "name": "Prajakta Managuli",
+                              "profile_pic_url": null,
+                              "position": "Content Writer",
+                              "organization_name": "Techuplabs",
+                              "consent": null
+                            },
+                            "audio_feed": {
+                              "is_audio_converted": 1,
+                              "transcript": null,
+                              "file_url": "https://dm219012nbq21.cloudfront.net/uploads/zhBU6t/audio-feed/feed_zhBU6t1744015722679.mp3"
+                            },
+                            "is_download_enabled": false
+                          }
+                        ],
+                        "first_page_url": "https://api.feedspace.io/v3/feeds?page=1",
+                        "from": 1,
+                        "next_page_url": null,
+                        "path": "https://api.feedspace.io/v3/feeds",
+                        "per_page": 15,
+                        "prev_page_url": null,
+                        "to": 2
+                      },
+                      "show_updated_banner": false,
+                      "updated_banner_video": "https://feedspace-test.s3.ap-south-1.amazonaws.com/uploads/F43kUl/video-feed/feed_MJcmzA81710841191347.mp4",
+                      "show_workspaces_merge_banner": false,
+                      "unique_form_id": "form_gSgElcsXX8LaI6RtMA6JqlkN"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ]
+      }
+    },
+    "/feeds/audio/{audio_feed_id}": {
+      "get": {
+        "description": "Get details of a specific audio feed based on audio feed ID.",
+        "parameters": [
+          {
+            "name": "audio_feed_id",
+            "in": "path",
+            "description": "Audio feed ID",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audio review details fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "object" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "id": 544,
+                        "unique_feedback_id": "qrTTi2",
+                        "public_url": "https://www.feedspace.io/af/qrTTi2",
+                        "comment": null,
+                        "type": "Uploaded",
+                        "favourite": 0,
+                        "transcript": null,
+                        "is_audio_converted": 1,
+                        "created_at": "2025-04-07T08:50:44.000000Z",
+                        "feed_fields": {
+                          "name": "Prajakta Managuli",
+                          "profile_pic_url": null,
+                          "position": "Content Writer",
+                          "organization_name": "Techuplabs",
+                          "consent": null
+                        },
+                        "feed_form": {
+                          "name": "New Review Form",
+                          "unique_form_id": "form_gSgElcsXX8LaI6RtMA6JqlkN",
+                          "public_url": "https://www.feedspace.io/u/4en9smV"
+                        },
+                        "question_answers": [
+                          {
+                            "feed_form_question_id": 30081,
+                            "question_type": 1,
+                            "question_text": "name",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": "Prajakta Managuli",
+                            "placeholder": "Name"
+                          },
+                          {
+                            "feed_form_question_id": 30082,
+                            "question_type": 1,
+                            "question_text": "email",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": null,
+                            "placeholder": "Email"
+                          },
+                          {
+                            "feed_form_question_id": 30084,
+                            "question_type": 1,
+                            "question_text": "position",
+                            "default_value": "",
+                            "question_label": "Job Role",
+                            "mandatory": 0,
+                            "answer": "Content Writer",
+                            "placeholder": "Job Role"
+                          },
+                          {
+                            "feed_form_question_id": 30085,
+                            "question_type": 1,
+                            "question_text": "organization_name",
+                            "default_value": "",
+                            "question_label": "Company Name",
+                            "mandatory": 0,
+                            "answer": "Techuplabs",
+                            "placeholder": "Company Name"
+                          },
+                          {
+                            "feed_form_question_id": 30086,
+                            "question_type": 1,
+                            "question_text": "contact_number",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": "9876543210",
+                            "placeholder": "Contact Number"
+                          },
+                          {
+                            "feed_form_question_id": 30083,
+                            "question_type": 4,
+                            "question_text": "consent",
+                            "default_value": "",
+                            "question_label": "I hereby grant permission to share this review with others.",
+                            "mandatory": 0,
+                            "answer": "1",
+                            "placeholder": "Consent"
+                          }
+                        ],
+                        "is_download_enabled": false,
+                        "file_url": "https://dm219012nbq21.cloudfront.net/uploads/zhBU6t/audio-feed/feed_zhBU6t1744015722679.mp3"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ]
+      },
+      "put": {
+        "description": "Add or remove a specific audio feed to/from favourites.",
+        "parameters": [
+          {
+            "name": "audio_feed_id",
+            "in": "path",
+            "description": "Audio feed ID",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "description": "Favourite status (1 to add, 0 to remove)",
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "favourite": { "type": "string", "enum": ["1", "0"] }
+                },
+                "required": ["favourite"]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Favourite status updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": { "type": "object" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "message": "Review updated successfully",
+                      "data": {
+                        "id": 544,
+                        "unique_feedback_id": "qrTTi2",
+                        "public_url": "https://www.feedspace.io/af/qrTTi2",
+                        "comment": null,
+                        "type": "Uploaded",
+                        "favourite": true,
+                        "transcript": "Hi, I'm Prajakha. I'm a content writer, and I've been using feedspace to collect feedback and testimonials from my clients. The feedback is helping me get better at my work and provide better value to my clients. Whereas the testimonials, I've been sharing those on social media. I'm adding them in my portfolio and I am putting them on my blog also along with case studies. This is helping me get a lot of inbound leads and also instill. I trust in my potential clients. So, yeah, it's been really helpful so far.",
+                        "is_audio_converted": 1,
+                        "created_at": "2025-04-07T08:50:44.000000Z",
+                        "feed_fields": {
+                          "name": "Prajakta Managuli",
+                          "profile_pic_url": null,
+                          "position": "Content Writer",
+                          "organization_name": "Techuplabs",
+                          "consent": null
+                        },
+                        "feed_form": {
+                          "name": "New Review Form",
+                          "unique_form_id": "form_gSgElcsXX8LaI6RtMA6JqlkN",
+                          "public_url": "https://www.feedspace.io/u/4en9smV"
+                        },
+                        "question_answers": [
+                          {
+                            "feed_form_question_id": 30081,
+                            "question_type": 1,
+                            "question_text": "name",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": "Prajakta Managuli",
+                            "placeholder": "Name"
+                          },
+                          {
+                            "feed_form_question_id": 30082,
+                            "question_type": 1,
+                            "question_text": "email",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": null,
+                            "placeholder": "Email"
+                          },
+                          {
+                            "feed_form_question_id": 30084,
+                            "question_type": 1,
+                            "question_text": "position",
+                            "default_value": "",
+                            "question_label": "Job Role",
+                            "mandatory": 0,
+                            "answer": "Content Writer",
+                            "placeholder": "Job Role"
+                          },
+                          {
+                            "feed_form_question_id": 30085,
+                            "question_type": 1,
+                            "question_text": "organization_name",
+                            "default_value": "",
+                            "question_label": "Company Name",
+                            "mandatory": 0,
+                            "answer": "Techuplabs",
+                            "placeholder": "Company Name"
+                          },
+                          {
+                            "feed_form_question_id": 30086,
+                            "question_type": 1,
+                            "question_text": "contact_number",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": "9876543210",
+                            "placeholder": "Contact Number"
+                          },
+                          {
+                            "feed_form_question_id": 30083,
+                            "question_type": 4,
+                            "question_text": "consent",
+                            "default_value": "",
+                            "question_label": "I hereby grant permission to share this review with others.",
+                            "mandatory": 0,
+                            "answer": "1",
+                            "placeholder": "Consent"
+                          }
+                        ],
+                        "is_download_enabled": false,
+                        "file_url": "https://dm219012nbq21.cloudfront.net/uploads/zhBU6t/audio-feed/feed_zhBU6t1744015722679.mp3"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ]
+      },
+      "delete": {
+        "description": "Soft delete a specific audio feed from the list.",
+        "parameters": [
+          {
+            "name": "audio_feed_id",
+            "in": "path",
+            "description": "Audio feed ID",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audio review deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "message": "Review deleted successfully"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ]
+      }
+    },
+    "/feeds?filter[feed-types][]=video": {
+      "get": {
+        "description": "Get paginated list of all Video Feeds received.",
+        "parameters": [
+          {
+            "name": "filter[feed-types][]",
+            "in": "query",
+            "description": "Feed type filter (video)",
+            "required": true,
+            "schema": { "type": "string", "enum": ["video"] }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace ID",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [
+          { "bearerAuth": [] }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video reviews list fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": { "type": "integer" },
+                        "data": {
+                          "type": "array",
+                          "items": { "type": "object" }
+                        },
+                        "first_page_url": { "type": "string" },
+                        "from": { "type": "integer" },
+                        "next_page_url": { "type": ["string", "null"] },
+                        "path": { "type": "string" },
+                        "per_page": { "type": "integer" },
+                        "prev_page_url": { "type": ["string", "null"] },
+                        "to": { "type": "integer" }
+                      }
+                    },
+                    "show_updated_banner": { "type": "boolean" },
+                    "updated_banner_video": { "type": "string" },
+                    "show_workspaces_merge_banner": { "type": "boolean" },
+                    "unique_form_id": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "current_page": 1,
+                        "data": [
+                          {
+                            "feed_type": "video_feed",
+                            "id": 123,
+                            "unique_feedback_id": "abc123",
+                            "comment": null,
+                            "favourite": 1,
+                            "is_locked": 0,
+                            "is_video_converted": 1,
+                            "is_audio_converted": null,
+                            "customer_designation": null,
+                            "created_at": "2025-04-07T08:50:44.000000Z",
+                            "feed_fields": {
+                              "name": "John Doe",
+                              "profile_pic_url": null,
+                              "position": "Designer",
+                              "organization_name": "Techuplabs",
+                              "consent": null
+                            },
+                            "video_feed": {
+                              "is_video_converted": 1,
+                              "transcript": null,
+                              "file_url": "https://dm219012nbq21.cloudfront.net/uploads/abc123/video-feed/feed_abc1231744015722679.mp4"
+                            },
+                            "is_download_enabled": true
+                          }
+                        ],
+                        "first_page_url": "https://api.feedspace.io/v3/feeds?page=1",
+                        "from": 1,
+                        "next_page_url": null,
+                        "path": "https://api.feedspace.io/v3/feeds",
+                        "per_page": 15,
+                        "prev_page_url": null,
+                        "to": 1
+                      },
+                      "show_updated_banner": false,
+                      "updated_banner_video": "https://feedspace-test.s3.ap-south-1.amazonaws.com/uploads/abc123/video-feed/feed_abc1231744015722679.mp4",
+                      "show_workspaces_merge_banner": false,
+                      "unique_form_id": "form_abc123"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feeds/video/{video_feed_id}": {
+      "get": {
+        "description": "Get details of a single Video Review.",
+        "parameters": [
+          {
+            "name": "video_feed_id",
+            "in": "path",
+            "description": "ID of the video feed",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [
+          { "bearerAuth": [] }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video review details fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "object" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "id": 123,
+                        "unique_feedback_id": "abc123",
+                        "public_url": "https://www.feedspace.io/vf/abc123",
+                        "comment": null,
+                        "type": "Uploaded",
+                        "favourite": 1,
+                        "transcript": null,
+                        "is_video_converted": 1,
+                        "created_at": "2025-04-07T08:50:44.000000Z",
+                        "feed_fields": {
+                          "name": "John Doe",
+                          "profile_pic_url": null,
+                          "position": "Designer",
+                          "organization_name": "Techuplabs",
+                          "consent": null
+                        },
+                        "feed_form": {
+                          "name": "Video Review Form",
+                          "unique_form_id": "form_abc123",
+                          "public_url": "https://www.feedspace.io/u/abc123"
+                        },
+                        "question_answers": [
+                          {
+                            "feed_form_question_id": 40081,
+                            "question_type": 1,
+                            "question_text": "name",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": "John Doe",
+                            "placeholder": "Name"
+                          },
+                          {
+                            "feed_form_question_id": 40082,
+                            "question_type": 1,
+                            "question_text": "email",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": null,
+                            "placeholder": "Email"
+                          }
+                        ],
+                        "is_download_enabled": true,
+                        "file_url": "https://dm219012nbq21.cloudfront.net/uploads/abc123/video-feed/feed_abc1231744015722679.mp4"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Add or remove a video review from favourites.",
+        "parameters": [
+          {
+            "name": "video_feed_id",
+            "in": "path",
+            "description": "ID of the video feed",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace ID",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "favourite": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Set to '1' to add to favourites, '0' to remove from favourites"
+                  }
+                },
+                "required": ["favourite"]
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ],
+        "responses": {
+          "200": {
+            "description": "Favourite status updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": { "type": "object" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "message": "Review updated successfully",
+                      "data": {
+                        "id": 123,
+                        "unique_feedback_id": "abc123",
+                        "public_url": "https://www.feedspace.io/vf/abc123",
+                        "comment": null,
+                        "type": "Uploaded",
+                        "favourite": false,
+                        "transcript": "This is a sample transcript for the video review.",
+                        "is_video_converted": 1,
+                        "created_at": "2025-04-07T08:50:44.000000Z",
+                        "feed_fields": {
+                          "name": "John Doe",
+                          "profile_pic_url": null,
+                          "position": "Designer",
+                          "organization_name": "Techuplabs",
+                          "consent": null
+                        },
+                        "feed_form": {
+                          "name": "Video Review Form",
+                          "unique_form_id": "form_abc123",
+                          "public_url": "https://www.feedspace.io/u/abc123"
+                        },
+                        "question_answers": [
+                          {
+                            "feed_form_question_id": 40081,
+                            "question_type": 1,
+                            "question_text": "name",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": "John Doe",
+                            "placeholder": "Name"
+                          },
+                          {
+                            "feed_form_question_id": 40082,
+                            "question_type": 1,
+                            "question_text": "email",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": null,
+                            "placeholder": "Email"
+                          }
+                        ],
+                        "is_download_enabled": true,
+                        "file_url": "https://dm219012nbq21.cloudfront.net/uploads/abc123/video-feed/feed_abc1231744015722679.mp4"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Soft delete a video review.",
+        "parameters": [
+          {
+            "name": "video_feed_id",
+            "in": "path",
+            "description": "ID of the video feed",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [
+          { "bearerAuth": [] }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video review deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "message": "Review deleted successfully"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feeds?filter[feed-types][]=text": {
+      "get": {
+        "description": "Get paginated list of all Text Feeds received.",
+        "parameters": [
+          {
+            "name": "filter[feed-types][]",
+            "in": "query",
+            "description": "Feed type filter (text)",
+            "required": true,
+            "schema": { "type": "string", "enum": ["text"] }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Text reviews list fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": { "type": "integer" },
+                        "data": { "type": "array", "items": { "type": "object" } },
+                        "first_page_url": { "type": "string" },
+                        "from": { "type": "integer" },
+                        "next_page_url": { "type": ["string", "null"] },
+                        "path": { "type": "string" },
+                        "per_page": { "type": "integer" },
+                        "prev_page_url": { "type": ["string", "null"] },
+                        "to": { "type": "integer" }
+                      }
+                    },
+                    "show_updated_banner": { "type": "boolean" },
+                    "updated_banner_video": { "type": "string" },
+                    "show_workspaces_merge_banner": { "type": "boolean" },
+                    "unique_form_id": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "current_page": 1,
+                        "data": [
+                          {
+                            "feed_type": "text_feed",
+                            "id": 9773,
+                            "unique_feedback_id": "6cZMP8",
+                            "comment": "Cool Product !!",
+                            "favourite": false,
+                            "is_locked": null,
+                            "is_video_converted": null,
+                            "is_audio_converted": null,
+                            "customer_designation": null,
+                            "created_at": "2025-04-04T13:48:25.000000Z",
+                            "feed_fields": {
+                              "name": "Anonymous",
+                              "profile_pic_url": null,
+                              "position": null,
+                              "organization_name": null,
+                              "consent": null
+                            },
+                            "text_feed": {
+                              "rating_type": "star",
+                              "response": "5"
+                            }
+                          }
+                        ],
+                        "first_page_url": "https://api.feedspace.io/v3/feeds?page=1",
+                        "from": 1,
+                        "next_page_url": null,
+                        "path": "https://api.feedspace.io/v3/feeds",
+                        "per_page": 15,
+                        "prev_page_url": null,
+                        "to": 1
+                      },
+                      "show_updated_banner": false,
+                      "updated_banner_video": "https://feedspace-test.s3.ap-south-1.amazonaws.com/uploads/F43kUl/video-feed/feed_MJcmzA81710841191347.mp4",
+                      "show_workspaces_merge_banner": false,
+                      "unique_form_id": "form_MbgOEoTSlvsjYg8wN7NTZ1fg"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ]
+      }
+    },
+    "/feeds/text/{text_feed_id}": {
+      "get": {
+        "description": "Get details of a specific text feed based on text feed ID.",
+        "parameters": [
+          {
+            "name": "text_feed_id",
+            "in": "path",
+            "description": "Text feed ID",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Text review details fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "object" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "id": 9773,
+                        "unique_feedback_id": "6cZMP8",
+                        "public_url": "https://www.feedspace.io/f/6cZMP8",
+                        "comment": "Cool Product !!",
+                        "type": "Uploaded",
+                        "favourite": false,
+                        "created_at": "2025-04-04T13:48:25.000000Z",
+                        "feed_fields": {
+                          "name": "Anonymous",
+                          "profile_pic_url": null,
+                          "position": null,
+                          "organization_name": null,
+                          "consent": null
+                        },
+                        "feed_form": {
+                          "name": "Test Review Form",
+                          "unique_form_id": "form_MbgOEoTSlvsjYg8wN7NTZ1fg",
+                          "public_url": "https://www.feedspace.io/u/cGdkixR"
+                        },
+                        "question_answers": [
+                          {
+                            "feed_form_question_id": 30062,
+                            "question_type": 1,
+                            "question_text": "name",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": null,
+                            "placeholder": "Name"
+                          },
+                          {
+                            "feed_form_question_id": 30063,
+                            "question_type": 1,
+                            "question_text": "email",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": null,
+                            "placeholder": "Email"
+                          },
+                          {
+                            "feed_form_question_id": 30064,
+                            "question_type": 4,
+                            "question_text": "consent",
+                            "default_value": "",
+                            "question_label": "I hereby grant permission to share this review with others.",
+                            "mandatory": 0,
+                            "answer": "1",
+                            "placeholder": "Consent"
+                          }
+                        ],
+                        "extra_details": null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ]
+      },
+      "put": {
+        "description": "Add or remove a specific text feed to/from favourites.",
+        "parameters": [
+          {
+            "name": "text_feed_id",
+            "in": "path",
+            "description": "Text feed ID",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "description": "Favourite status (1 to add, 0 to remove)",
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "favourite": { "type": "string", "enum": ["1", "0"] }
+                },
+                "required": ["favourite"]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Favourite status updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": { "type": "object" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "message": "Review updated successfully",
+                      "data": {
+                        "id": 9773,
+                        "unique_feedback_id": "6cZMP8",
+                        "public_url": "https://www.feedspace.io/f/6cZMP8",
+                        "comment": "Cool Product !!",
+                        "favourite": true,
+                        "created_at": "2025-04-04T13:48:25.000000Z",
+                        "feed_fields": {
+                          "name": "Anonymous",
+                          "profile_pic_url": null,
+                          "position": null,
+                          "organization_name": null,
+                          "consent": null
+                        },
+                        "feed_form": {
+                          "name": "Test Review Form",
+                          "unique_form_id": "form_MbgOEoTSlvsjYg8wN7NTZ1fg",
+                          "public_url": "https://www.feedspace.io/u/cGdkixR"
+                        },
+                        "question_answers": [
+                          {
+                            "feed_form_question_id": 30062,
+                            "question_type": 1,
+                            "question_text": "name",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": null,
+                            "placeholder": "Name"
+                          },
+                          {
+                            "feed_form_question_id": 30063,
+                            "question_type": 1,
+                            "question_text": "email",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "answer": null,
+                            "placeholder": "Email"
+                          },
+                          {
+                            "feed_form_question_id": 30064,
+                            "question_type": 4,
+                            "question_text": "consent",
+                            "default_value": "",
+                            "question_label": "I hereby grant permission to share this review with others.",
+                            "mandatory": 0,
+                            "answer": "1",
+                            "placeholder": "Consent"
+                          }
+                        ],
+                        "extra_details": null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ]
+      },
+      "delete": {
+        "description": "Soft delete a specific text feed from the list.",
+        "parameters": [
+          {
+            "name": "text_feed_id",
+            "in": "path",
+            "description": "Text feed ID",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Text review deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "message": "Review deleted successfully"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ]
+      }
+    },
+    "/pages": {
+      "get": {
+        "description": "Get all Wall of Love pages.",
+        "parameters": [
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [
+          { "bearerAuth": [] }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Wall of Love pages fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "array", "items": { "type": "object" } },
+                    "message": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "current_page": 1,
+                        "data": [
+                          {
+                            "id": 406,
+                            "unique_page_id": "page_3quM56ynXjoHeUsRPqrBe1f9",
+                            "slug": "klcw97GWPX",
+                            "name": "Wall of Love",
+                            "preview_image": "uploads/zhBU6t/promotion/174400722399rrrPd-preview.jpg",
+                            "meta": {
+                              "allow_custom_domain": 0
+                            },
+                            "view_count": 0,
+                            "public_url": "https://www.feedspace.io/w/klcw97GWPX",
+                            "workspace": null,
+                            "show_switch_workspace": true,
+                            "preview_image_url": "https://dm219012nbq21.cloudfront.net/uploads/zhBU6t/promotion/174400722399rrrPd-preview.jpg"
+                          },
+                          {
+                            "id": 405,
+                            "unique_page_id": "page_Rf1KiPbaKNWxJMo6fm3icsxp",
+                            "slug": "QN5pr8yne2",
+                            "name": "My Wall of love",
+                            "preview_image": "uploads/zhBU6t/promotion/1744006043SlJXm2M-preview.jpg",
+                            "meta": {
+                              "allow_custom_domain": 0
+                            },
+                            "view_count": 0,
+                            "public_url": "https://www.feedspace.io/w/QN5pr8yne2",
+                            "workspace": null,
+                            "show_switch_workspace": true,
+                            "preview_image_url": "https://dm219012nbq21.cloudfront.net/uploads/zhBU6t/promotion/1744006043SlJXm2M-preview.jpg"
+                          }
+                        ],
+                        "first_page_url": "https://api.feedspace.io/v3/pages?page=1",
+                        "from": 1,
+                        "next_page_url": null,
+                        "path": "https://api.feedspace.io/v3/pages",
+                        "per_page": 1000,
+                        "prev_page_url": null,
+                        "to": 2
+                      },
+                      "show_merge_wol_banner": false,
+                      "unique_workspace": null,
+                      "unique_form_id": "form_gSgElcsXX8LaI6RtMA6JqlkN",
+                      "total_feeds_count": 6
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Create a new Wall of Love page.",
+        "parameters": [
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "description": "Name of the Wall of Love page" }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wall of Love page created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": { "type": "object" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "message": "Page Created Successfully",
+                      "data": {
+                        "id": 407,
+                        "unique_page_id": "page_asN7DjyRStBAGx4xANmUuNK5",
+                        "slug": "J0SrBzf5yj",
+                        "public_url": "https://www.feedspace.io/w/J0SrBzf5yj"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pages/feeds": {
+      "get": {
+        "description": "Get all reviews for Wall of Love pages, with filters for feed types, favourite, forms, and imported sources.",
+        "parameters": [
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "filter[feed-types][0]",
+            "in": "query",
+            "description": "Feed type filter (e.g., text, social, etc.)",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "filter[feed-types][1]",
+            "in": "query",
+            "description": "Feed type filter (e.g., text, social, etc.)",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "filter[favourite]",
+            "in": "query",
+            "description": "Filter for favourite reviews (1 for favourite)",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "filter[feed-forms][0]",
+            "in": "query",
+            "description": "Filter by feed form ID",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "filter[imported-froms][0]",
+            "in": "query",
+            "description": "Filter by imported-from source ID",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [
+          { "bearerAuth": [] }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wall of Love reviews fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "array", "items": { "type": "object" } },
+                    "message": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "current_page": 1,
+                        "data": [
+                          {
+                            "feed_identifier": "feed-text-item-9793",
+                            "feed_type": "text_feed",
+                            "id": 9793,
+                            "unique_feedback_id": "YiyoZB",
+                            "comment": "Nice product, keep going!",
+                            "favourite": 1,
+                            "is_locked": null,
+                            "is_video_converted": null,
+                            "is_audio_converted": null,
+                            "customer_designation": null,
+                            "created_at": "2025-04-07 06:12:05",
+                            "feed_fields": {
+                              "name": "Henry Ford",
+                              "profile_pic_url": null,
+                              "position": "Engineer",
+                              "organization_name": null,
+                              "consent": true
+                            },
+                            "text_feed": {
+                              "rating_type": "star",
+                              "response": "5"
+                            }
+                          },
+                          {
+                            "feed_identifier": "feed-social-item-170021",
+                            "feed_type": "social_feed",
+                            "id": 170021,
+                            "unique_feedback_id": "6Fe3xF",
+                            "comment": "It is a great feature to collect feedback with just URL.\nI am using it for collecting my clients' queries in the video form.",
+                            "favourite": 1,
+                            "is_locked": null,
+                            "is_video_converted": null,
+                            "is_audio_converted": null,
+                            "customer_designation": null,
+                            "feed_fields": {
+                              "name": "bhautik_a._mangukiya",
+                              "profile_pic_url": "https://dm219012nbq21.cloudfront.net/uploads/zhBU6t/youtube-comments/youtube-comment-author-profile-oCKH-1744005577.jpg",
+                              "position": "",
+                              "organization_name": "",
+                              "consent": null
+                            },
+                            "social_feed": {
+                              "rating_type": "1",
+                              "rating": "0.0",
+                              "review_at": "Aug 06, 2024 13:29:48",
+                              "review_title": "",
+                              "social_platform": {
+                                "icon_full_url": "https://app.feedspace.io//assets/img/social-icons/v2/youtube.png",
+                                "review_url": "https://www.youtube.com/watch?v=KC_jGMywpmI&lc=Ugzy7TOjcWGur14AIHJ4AaABAg",
+                                "review_type": null
+                              }
+                            }
+                          }
+                        ],
+                        "first_page_url": "https://api.feedspace.io/v3/pages/feeds?page=1",
+                        "from": 1,
+                        "next_page_url": null,
+                        "path": "https://api.feedspace.io/v3/pages/feeds",
+                        "per_page": 15,
+                        "prev_page_url": null,
+                        "to": 2
+                      },
+                      "unique_form_id": "form_gSgElcsXX8LaI6RtMA6JqlkN"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pages/{page_id}": {
+      "put": {
+        "description": "Update an existing Wall of Love page.",
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "path",
+            "description": "ID of the Wall of Love page",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "_method": { "type": "string", "enum": ["PUT"] },
+                  "show_logo": { "type": "string", "enum": ["0", "1"] },
+                  "logo": { "type": "string", "format": "binary" },
+                  "is_logo_redirect_url": { "type": "string", "enum": ["0", "1"] },
+                  "redirect_url": { "type": "string" },
+                  "name": { "type": "string" },
+                  "title": { "type": "string" },
+                  "subtitle": { "type": "string" },
+                  "enable_cta_button": { "type": "string", "enum": ["0", "1"] },
+                  "button_name": { "type": "string" },
+                  "button_url": { "type": "string" },
+                  "allow_to_display_feed_date": { "type": "string", "enum": ["0", "1"] }
+                },
+                "required": ["_method", "name"]
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wall of Love page updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "message": "Page Updated Successfully"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/review-forms": {
+      "get": {
+        "tags": [
+          "ReviewForms"
+        ],
+        "summary": "Get all review forms",
+        "description": "Returns a list of all review forms.",
+        "operationId": "getAllReviewForms",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of review forms.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewForm"
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "current_page": 1,
+                        "data": [
+                          {
+                            "id": 10391,
+                            "project_id": 5022,
+                            "unique_form_id": "form_MbgOEoTSlvsjYg8wN7NTZ1fg",
+                            "name": "Test Review Form",
+                            "page_image": null,
+                            "updated_at": "2025-04-04T13:19:53.000000Z",
+                            "slug": "cGdkixR",
+                            "allow_custom_domain": 0,
+                            "video_feeds_count": 0,
+                            "audio_feeds_count": 0,
+                            "text_feeds_count": 0,
+                            "public_url": "https://www.feedspace.io/u/cGdkixR",
+                            "public_display_url": "feedspace.io/u/cGdkixR",
+                            "page_image_url": null,
+                            "workspace": {
+                              "id": 5022,
+                              "unique_workspace_id": "workspace_ZuYEOLliSpLzzH76bk5x7PPY",
+                              "user_id": 7243,
+                              "name": "G Workspace",
+                              "domain": null,
+                              "custom_domain": null,
+                              "logo": null,
+                              "environment": 0,
+                              "description": "Test",
+                              "website_url": "",
+                              "status": 1,
+                              "is_allowed_public_reviews": 0,
+                              "created_by": 7243,
+                              "created_at": "2025-04-04T12:35:54.000000Z",
+                              "updated_at": "2025-04-04T12:44:26.000000Z",
+                              "deleted_at": null,
+                              "logo_url": null
+                            }
+                          }
+                        ],
+                        "first_page_url": "https://api.feedspace.io/v3/forms?page=1",
+                        "from": 1,
+                        "next_page_url": null,
+                        "path": "https://api.feedspace.io/v3/forms",
+                        "per_page": 1000,
+                        "prev_page_url": null,
+                        "to": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ReviewForms"
+        ],
+        "summary": "Create a review form",
+        "description": "Creates a new review form.",
+        "operationId": "createReviewForm",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/ReviewFormInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review form created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "unique_form_id": { "type": "string" },
+                        "slug": { "type": "string" },
+                        "public_url": { "type": "string" }
+                      }
+                    },
+                    "message": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "message": "Feed Form Created Successfully",
+                      "data": {
+                        "id": 10391,
+                        "unique_form_id": "form_MbgOEoTSlvsjYg8wN7NTZ1fg",
+                        "slug": "cGdkixR",
+                        "public_url": "https://www.feedspace.io/u/cGdkixR"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/review-forms/{feed_form_id}": {
+      "get": {
+        "tags": [
+          "ReviewForms"
+        ],
+        "summary": "Get a review form",
+        "description": "Returns a single review form by ID.",
+        "operationId": "getReviewForm",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "feed_form_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A review form.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewForm"
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "id": 10391,
+                        "project_id": 5022,
+                        "unique_form_id": "form_MbgOEoTSlvsjYg8wN7NTZ1fg",
+                        "user_id": 7243,
+                        "slug": "cGdkixR",
+                        "name": "Test Review Form",
+                        "description": null,
+                        "page_title": "How's your experience using our Product?",
+                        "page_main_message": null,
+                        "messaging_description": null,
+                        "page_image": null,
+                        "hide_image": 0,
+                        "submit_attributes": {
+                          "attribution_title": "You're almost done!",
+                          "attribution_subtitle": "Please add your information"
+                        },
+                        "thankyou_attributes": {
+                          "thank_you_type": "thank_you_page",
+                          "thankyou_title": "Thank you 🤗",
+                          "thankyou_message": "Hurray! Your review has been submitted successfully. Thanks for your time.",
+                          "thankyou_reveal_text": null,
+                          "google_review_section": 0,
+                          "thankyou_redirection_url": null,
+                          "allow_video_and_shareable_link": 0
+                        },
+                        "form_attributes": {
+                          "text": {
+                            "modal_title": null,
+                            "rating_type": "star",
+                            "question_text": null,
+                            "allow_review_type": 1,
+                            "allow_text_review": 1,
+                            "text_button_label": "Write Text Review",
+                            "is_required_remark": 0,
+                            "remark_placeholder": "Add your review comment here",
+                            "submit_button_label": "Submit",
+                            "option_to_add_remark": 1,
+                            "is_mandatory_feedback": 1
+                          },
+                          "audio": {
+                            "audio_duration": 180,
+                            "audio_button_label": "Record Audio Review",
+                            "allow_audio_recording": 0
+                          },
+                          "video": {
+                            "video_duration": 180,
+                            "video_button_label": "Record Video Review",
+                            "screen_button_label": "Record Screen Sharing",
+                            "allow_video_recording": 1,
+                            "allow_screen_recording": 0
+                          },
+                          "instruction_page": {
+                            "instruction_title": null,
+                            "instruction_description": null,
+                            "instruction_page_display": "do_not_show",
+                            "open_recorder_button_label": "Start Recording"
+                          },
+                          "upload_file_option": {
+                            "allow_files": [
+                              "all_video"
+                            ],
+                            "text_file_upload_label": "Choose a file to upload",
+                            "allow_upload_file_option": 0
+                          }
+                        },
+                        "custom_attributes": {
+                          "page_primary_color": "#144CD8",
+                          "page_backgound_color": "#EFF6FF"
+                        },
+                        "allow_auto_detect_language": 0,
+                        "allow_to_remove_branding": 0,
+                        "allow_custom_domain": 0,
+                        "video_meta": {
+                          "video_time_limit": "180",
+                          "upload_video_outside_app": "1"
+                        },
+                        "audio_meta": {
+                          "upload_audio_outside_app": "1"
+                        },
+                        "branding_meta": {
+                          "hide_fs_branding": "0",
+                          "allow_custom_domain": "0"
+                        },
+                        "allow_star_redirection": 0,
+                        "public_url": "https://www.feedspace.io/u/cGdkixR",
+                        "public_url_with_custom_domain": "https://www.feedspace.io/u/cGdkixR",
+                        "public_display_url": "feedspace.io/u/cGdkixR",
+                        "public_display_url_with_custom_domain": "feedspace.io/u/cGdkixR",
+                        "is_custom_domain": false,
+                        "uuid": "zhBU6t",
+                        "page_image_url": null,
+                        "questions": [
+                          {
+                            "id": 30062,
+                            "feed_form_id": 10391,
+                            "question_type": 1,
+                            "question_text": "name",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "enabled": 1
+                          },
+                          {
+                            "id": 30063,
+                            "feed_form_id": 10391,
+                            "question_type": 1,
+                            "question_text": "email",
+                            "default_value": "",
+                            "question_label": "",
+                            "mandatory": 0,
+                            "enabled": 1
+                          },
+                          {
+                            "id": 30064,
+                            "feed_form_id": 10391,
+                            "question_type": 4,
+                            "question_text": "consent",
+                            "default_value": "",
+                            "question_label": "I hereby grant permission to share this review with others.",
+                            "mandatory": 0,
+                            "enabled": 1
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ReviewForms"
+        ],
+        "summary": "Update a review form",
+        "description": "Updates an existing review form by ID.",
+        "operationId": "updateReviewForm",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "feed_form_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewFormInput"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
+            "description": "Review form updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "message": "Form Updated Successfully"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/imports/self-imports/text-review": {
+      "post": {
+        "description": "Import a text review manually into the workspace.",
+        "parameters": [
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customer_avatar": { "type": "string", "format": "binary", "description": "Customer avatar image (optional)" },
+                  "customer_name": { "type": "string", "description": "Customer name" },
+                  "customer_email": { "type": "string", "description": "Customer email" },
+                  "customer_designation": { "type": "string", "description": "Customer designation" },
+                  "customer_company": { "type": "string", "description": "Customer company" },
+                  "rating": { "type": "string", "description": "1- lowest, 5- highest" },
+                  "review_url": { "type": "string", "description": "Review source URL" },
+                  "website_logo": { "type": "string", "format": "binary", "description": "Website logo image (optional)" },
+                  "review": { "type": "string", "description": "Review text" },
+                  "attachments[]": { "type": "string", "format": "binary", "description": "Attachment images (optional)", "nullable": true }
+                },
+                "required": ["customer_name", "customer_email", "customer_designation", "customer_company", "rating", "review_url", "review"]
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ],
+        "responses": {
+          "200": {
+            "description": "Text review imported successfully.",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "project_id": 5020,
+                        "social_platform_id": 46,
+                        "source": "Manual Text Review",
+                        "extra_details": "{\"customer_name\":\"User\",\"customer_email\":\"developer@feedspace.io\",\"customer_designation\":\"Engineer\",\"customer_company\":\"Feedspace\",\"rating\":\"5\",\"review_url\":\"https:\\/\\/www.feedspace.io\\/\",\"review\":\"Excellent Digital Product. They create client testimonial videos and interview the clients from the comfort of their own homes.\",\"fs_workspace_id\":\"workspace_XFNj94dgkDhc6lc5rsjF66nr\",\"fs_original_workspace_id\":5020,\"search\":\"Manual Text Review\"}",
+                        "is_feed_imported": 1,
+                        "user_id": 7243,
+                        "created_by": 7243,
+                        "updated_at": "2025-06-11T07:31:49.000000Z",
+                        "created_at": "2025-06-11T07:31:44.000000Z",
+                        "id": 4066,
+                        "user": {
+                          "id": 7243,
+                          "unique_user_id": "zhBU6t",
+                          "appsumo_uuid": null,
+                          "name": "User",
+                          "email": "developer@feedspace.io",
+                          "email_verified_at": null,
+                          "referred_by": "0",
+                          "payment_email": null,
+                          "provider": null,
+                          "provider_id": null,
+                          "plan_id": null,
+                          "beta_user": 0,
+                          "is_verified_account": 1,
+                          "is_blocked": 0,
+                          "ip_address": "49.36.88.114",
+                          "created_at": "2025-04-04T11:52:43.000000Z",
+                          "updated_at": "2025-04-04T11:52:43.000000Z"
+                        },
+                        "social_platform": {
+                          "id": 46,
+                          "slug": "manual_text_review",
+                          "name": "Manual Text Review",
+                          "url": null,
+                          "icon_url": "/assets/img/social-icons/v2/manual_text_review_icon.svg",
+                          "review_type": 1,
+                          "auto_sync_status": 0,
+                          "created_at": "2025-04-22T07:49:08.000000Z",
+                          "updated_at": "2025-04-22T07:49:08.000000Z",
+                          "icon_full_url": "https://static.feedspace.io/assets/img/social-icons/v2/manual_text_review_icon.svg"
+                        },
+                        "social_feeds": [
+                          {
+                            "id": 176111,
+                            "unique_feedback_id": "WjOvsE",
+                            "user_id": 7243,
+                            "project_id": 5020,
+                            "social_platform_id": 46,
+                            "social_feed_source_id": 4066,
+                            "import_scheduler_id": null,
+                            "feed_type": "manual_text",
+                            "review_id": "xqr1lB",
+                            "review": "Excellent Digital Product. They create client testimonial videos and interview the clients from the comfort of their own homes.",
+                            "review_title": null,
+                            "review_url": "https://www.feedspace.io/",
+                            "review_website_logo": "uploads/zhBU6t/manual_text_review-reviews/manual_text_review-review-author-profile-L036-1749627109.jpg",
+                            "rating": 5,
+                            "rating_type": 1,
+                            "is_rating_display": 1,
+                            "customer_name": "User",
+                            "customer_email": "developer@feedspace.io",
+                            "customer_company": "Feedspace",
+                            "customer_designation": "Engineer",
+                            "customer_avatar": null,
+                            "review_at": "2025-06-11 07:31:44",
+                            "extra_details": "{\"customer_name\":\"User\",\"customer_email\":\"developer@feedspace.io\",\"customer_designation\":\"Engineer\",\"customer_company\":\"Feedspace\",\"rating\":\"5\",\"review_url\":\"https:\\/\\/www.feedspace.io\\/\",\"review\":\"Excellent Digital Product. They create client testimonial videos and interview the clients from the comfort of their own homes.\",\"fs_workspace_id\":\"workspace_XFNj94dgkDhc6lc5rsjF66nr\",\"fs_original_workspace_id\":5020,\"search\":\"Manual Text Review\"}",
+                            "favourite": 0,
+                            "sentiment_id": null,
+                            "review_submitted_at": "2025-06-11 07:31:44",
+                            "created_by": 7243,
+                            "deleted_at": null,
+                            "created_at": "2025-06-11T07:31:44.000000Z",
+                            "updated_at": "2025-06-11T07:31:49.000000Z"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/imports/self-imports/video-review": {
+      "post": {
+        "description": "Import a video review manually into the workspace.",
+        "parameters": [
+          {
+            "name": "fs-workspace-id",
+            "in": "header",
+            "description": "Workspace unique ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customer_avatar": { "type": "string", "format": "binary", "description": "Customer avatar image (optional)" },
+                  "customer_name": { "type": "string", "description": "Customer name" },
+                  "customer_email": { "type": "string", "description": "Customer email" },
+                  "customer_designation": { "type": "string", "description": "Customer designation" },
+                  "customer_company": { "type": "string", "description": "Customer company" },
+                  "rating": { "type": "string", "description": "0- lowest, 5- highest" },
+                  "review_url": { "type": "string", "description": "Review source URL" },
+                  "website_logo": { "type": "string", "format": "binary", "description": "Website logo image (optional)" },
+                  "review": { "type": "string", "description": "Review text" },
+                  "attachments[]": { "type": "string", "format": "binary", "description": "Attachment videos (optional)", "nullable": true },
+                  "type": { "type": "string", "description": "Type of import (should be 'file')" }
+                },
+                "required": ["customer_name", "customer_email", "customer_designation", "customer_company", "rating", "review_url", "review", "type"]
+              }
+            }
+          }
+        },
+        "security": [
+          { "bearerAuth": [] }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video review imported successfully.",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "data": {
+                        "project_id": 5020,
+                        "social_platform_id": 53,
+                        "source": "Manual Video Review",
+                        "extra_details": "{\"customer_name\":\"User\",\"customer_email\":\"developer@feedspace.io\",\"customer_designation\":\"Engineer\",\"customer_company\":\"Feedspace\",\"rating\":\"5\",\"review_url\":\"https:\\/\\/www.feedspace.io\\/\",\"review\":\"Excellent Digital Product. They create client testimonial videos and interview the clients from the comfort of their own homes.\",\"type\":\"file\",\"fs_workspace_id\":\"workspace_XFNj94dgkDhc6lc5rsjF66nr\",\"fs_original_workspace_id\":5020,\"customer_avatar\":{},\"website_logo\":{},\"attachments\":[{}],\"search\":\"Manual Video Review\"}",
+                        "is_feed_imported": 1,
+                        "user_id": 7243,
+                        "created_by": 7243,
+                        "updated_at": "2025-06-18T12:58:29.000000Z",
+                        "created_at": "2025-06-18T12:58:29.000000Z",
+                        "id": 4585,
+                        "user": {
+                          "id": 7243,
+                          "unique_user_id": "zhBU6t",
+                          "appsumo_uuid": null,
+                          "name": "User",
+                          "email": "developer@feedspace.io",
+                          "email_verified_at": null,
+                          "referred_by": "0",
+                          "payment_email": null,
+                          "provider": null,
+                          "provider_id": null,
+                          "plan_id": null,
+                          "beta_user": 0,
+                          "is_verified_account": 1,
+                          "is_blocked": 0,
+                          "ip_address": "49.36.88.114",
+                          "created_at": "2025-04-04T11:52:43.000000Z",
+                          "updated_at": "2025-04-04T11:52:43.000000Z"
+                        },
+                        "social_platform": {
+                          "id": 53,
+                          "slug": "manual_video_review",
+                          "name": "Manual Video Review",
+                          "url": null,
+                          "icon_url": "/assets/img/social-icons/v2/manual_video_review_icon.svg",
+                          "review_type": 1,
+                          "auto_sync_status": 0,
+                          "created_at": "2025-05-29T08:47:05.000000Z",
+                          "updated_at": "2025-05-29T08:47:05.000000Z",
+                          "icon_full_url": "https://static.feedspace.io/assets/img/social-icons/v2/manual_video_review_icon.svg"
+                        },
+                        "social_feeds": [
+                          {
+                            "id": 179022,
+                            "unique_feedback_id": "QDU5g4",
+                            "user_id": 7243,
+                            "project_id": 5020,
+                            "social_platform_id": 53,
+                            "social_feed_source_id": 4585,
+                            "import_scheduler_id": null,
+                            "feed_type": "manual_video",
+                            "review_id": "FlsqMs",
+                            "review": "Excellent Digital Product. They create client testimonial videos and interview the clients from the comfort of their own homes.",
+                            "review_title": null,
+                            "review_url": "https://www.feedspace.io/",
+                            "review_website_logo": "uploads/zhBU6t/manual_video_review-reviews/manual_video_review-review-author-profile-GHgS-1750251509.jpg",
+                            "rating": 5,
+                            "rating_type": 1,
+                            "is_rating_display": 1,
+                            "customer_name": "User",
+                            "customer_email": "developer@feedspace.io",
+                            "customer_company": "Feedspace",
+                            "customer_designation": "Engineer",
+                            "customer_avatar": "uploads/zhBU6t/manual_video_review-reviews/manual_video_review-review-author-profile-CAVq-1750251509.jpg",
+                            "review_at": "2025-06-18 12:58:29",
+                            "extra_details": "{\"customer_name\":\"User\",\"customer_email\":\"developer@feedspace.io\",\"customer_designation\":\"Engineer\",\"customer_company\":\"Feedspace\",\"rating\":\"5\",\"review_url\":\"https:\\/\\/www.feedspace.io\\/\",\"review\":\"Excellent Digital Product. They create client testimonial videos and interview the clients from the comfort of their own homes.\",\"type\":\"file\",\"fs_workspace_id\":\"workspace_XFNj94dgkDhc6lc5rsjF66nr\",\"fs_original_workspace_id\":5020,\"customer_avatar\":{},\"website_logo\":{},\"attachments\":[{}],\"search\":\"Manual Video Review\"}",
+                            "favourite": 0,
+                            "sentiment_id": null,
+                            "review_submitted_at": "2025-06-18 12:58:29",
+                            "created_by": 7243,
+                            "deleted_at": null,
+                            "created_at": "2025-06-18T12:58:29.000000Z",
+                            "updated_at": "2025-06-18T12:58:29.000000Z"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -154,63 +2526,70 @@
   },
   "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
+      "ReviewForm": {
         "type": "object",
         "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
+          "id": { "type": "integer" },
+          "project_id": { "type": "integer" },
+          "unique_form_id": { "type": "string" },
+          "user_id": { "type": "integer" },
+          "slug": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": ["string", "null"] },
+          "page_title": { "type": ["string", "null"] },
+          "page_main_message": { "type": ["string", "null"] },
+          "messaging_description": { "type": ["string", "null"] },
+          "page_image": { "type": ["string", "null"] },
+          "hide_image": { "type": "integer" },
+          "submit_attributes": { "type": "object" },
+          "thankyou_attributes": { "type": "object" },
+          "form_attributes": { "type": "object" },
+          "custom_attributes": { "type": "object" },
+          "allow_auto_detect_language": { "type": "integer" },
+          "allow_to_remove_branding": { "type": "integer" },
+          "allow_custom_domain": { "type": "integer" },
+          "video_meta": { "type": "object" },
+          "audio_meta": { "type": "object" },
+          "branding_meta": { "type": "object" },
+          "allow_star_redirection": { "type": "integer" },
+          "public_url": { "type": "string" },
+          "public_url_with_custom_domain": { "type": "string" },
+          "public_display_url": { "type": "string" },
+          "public_display_url_with_custom_domain": { "type": "string" },
+          "is_custom_domain": { "type": "boolean" },
+          "uuid": { "type": "string" },
+          "page_image_url": { "type": ["string", "null"] },
+          "questions": { "type": "array", "items": { "type": "object" } }
+        },
+        "required": ["name"]
       },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
+      "ReviewFormInput": {
         "type": "object",
         "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
+          "name": { "type": "string", "description": "Name of the review form" },
+          "page_title": { "type": "string", "description": "Title displayed on the form page" },
+          "page_main_message": { "type": "string", "description": "Main message or description for the form page" },
+          "allow_video_recording": { "type": "integer", "enum": [0,1], "description": "Enable video recording (1 = yes, 0 = no)" },
+          "video_button_label": { "type": "string", "description": "Label for the video recording button" },
+          "allow_screen_recording": { "type": "integer", "enum": [0,1], "description": "Enable screen recording (1 = yes, 0 = no)" },
+          "screen_button_label": { "type": "string", "description": "Label for the screen recording button" },
+          "allow_audio_recording": { "type": "integer", "enum": [0,1], "description": "Enable audio recording (1 = yes, 0 = no)" },
+          "audio_button_label": { "type": "string", "description": "Label for the audio recording button" },
+          "allow_text_review": { "type": "integer", "enum": [0,1], "description": "Enable text review (1 = yes, 0 = no)" },
+          "text_button_label": { "type": "string", "description": "Label for the text review button" },
+          "allow_upload_file_option": { "type": "integer", "enum": [0,1], "description": "Enable file upload option (1 = yes, 0 = no)" },
+          "text_file_upload_label": { "type": "string", "description": "Label for the file upload input" },
+          "allow_files": { "type": "array", "items": { "type": "string" }, "description": "Allowed file types for upload (e.g., all_video)" },
+          "page_image": { "type": "string", "format": "binary", "description": "Image file for the form page (optional)" }
+        },
+        "required": ["name"]
       }
     },
     "securitySchemes": {
       "bearerAuth": {
         "type": "http",
-        "scheme": "bearer"
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }
