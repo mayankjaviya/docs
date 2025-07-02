@@ -16,7 +16,7 @@
   "paths": {
     "/oauth/token": {
       "post": {
-        "description": "The primary purpose of this request is to obtain an access token that grants authorization for subsequent API requests. By exchanging valid credentials, such as a username and password, clients can obtain an access token that serves as a bearer token for validating future requests.\n\nResponse:\nUpon successful authentication, the endpoint responds with an access token and a refresh token. The access token, when included in the Authorization header of subsequent requests, validates the client's authorization. The refresh token allows clients to generate new access tokens without needing to re-enter credentials, enhancing user experience and security.",
+        "description": "Authenticate and obtain an access or refresh token.",
         "requestBody": {
           "description": "Login or refresh parameters.",
           "content": {
@@ -69,7 +69,7 @@
     },
     "/oauth/users": {
       "get": {
-        "description": "The primary purpose of this request is to fetch detailed information about the user who is currently logged in and authenticated via OAuth. By accessing this endpoint, clients can retrieve user-specific data, including profile information, preferences, and other relevant details necessary for delivering personalized services.\n\nResponse:\nUpon successful authentication and authorization, the endpoint responds with a JSON object containing various attributes and details associated with the logged-in user. This may include but is not limited to user ID, username, email address, profile picture URL, and any additional custom attributes.",
+        "description": "Get details of the authenticated user.",
         "responses": {
           "200": {
             "description": "User details fetched successfully.",
@@ -207,7 +207,7 @@
     },
     "/workspaces": {
       "get": {
-        "description": "The primary purpose of this request is to provide users with a paginated list of their workspaces, allowing them to navigate through their projects efficiently. By accessing this endpoint, users can retrieve essential information about each project, such as its name, description, and other relevant details.\n\nResponse:\nThe response contains list of all available workspaces along with associated forms as well. features[] represent text feed forms, audio_features[] represents audio feed forms, video_features[] represents video feed forms.",
+        "description": "Get a paginated list of workspaces.",
         "parameters": [
           {
             "name": "page",
@@ -297,7 +297,7 @@
         ]
       },
       "post": {
-        "description": "The primary purpose of this request is to enable users to create new workspaces tailored to their specific needs and objectives. By submitting the necessary parameters, such as the project name, description, and any other relevant details, users can initiate projects seamlessly.",
+        "description": "Create a new workspace.",
         "requestBody": {
           "description": "Workspace creation parameters (form-data)",
           "content": {
@@ -368,7 +368,7 @@
     },
     "/workspaces/{workspace_id}": {
       "post": {
-        "description": "The primary purpose of this request is to provide users with the capability to update existing workspaces according to their needs. By specifying the workspace ID and providing updated values for relevant attributes, users can effectively modify the properties of the workspace.",
+        "description": "Update an existing workspace.",
         "requestBody": {
           "description": "Workspace update parameters (form-data, with _method=PUT)",
           "content": {
