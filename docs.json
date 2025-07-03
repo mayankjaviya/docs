@@ -7,7 +7,7 @@
     "light": "#f3f4f6",
     "dark": "#f3f4f6"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/favicon.ico",
   "navigation": {
     "tabs": [
       {
@@ -90,8 +90,9 @@
     ]
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/feedspace-light.png",
+    "dark": "/logo/feedspace-light.png",
+    "href": "https://feedspace.io"
   },
   "navbar": {
     "primary": {
